@@ -1,14 +1,33 @@
-// server.js (Servidor en Node.js con Express y Socket.io)
-
 const express = require("express");
-const http = require('http');
-const { Server } = require('socket.io');
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*", // Permite cualquier origen (puedes cambiarlo a un dominio específico)
+    }
+});
 
-const PORT = process.env.PORT || 3000; // Usar el puerto de Railway o el 3000
+app.get("/", (req, res) => {
+    res.send("Servidor funcionando...");
+});
 
-app.use(express.static("public"));
+io.on("connection", (socket) => {
+    console.log("Un usuario se ha conectado");
 
-app.listen(PORT, () => {
-    console.log(`Servidor en línea en el puerto ${PORT}`);
+    socket.on("mensaje", (msg) => {
+        console.log("Mensaje recibido: ", msg);
+        io.emit("mensaje", msg); // Reenvía el mensaje a todos
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Un usuario se ha desconectado");
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
