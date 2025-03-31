@@ -1,35 +1,30 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*", // Permite cualquier origen (puedes cambiarlo a un dominio específico)
-    }
-});
+const io = socketIo(server);
 
-app.use(express.static('public'))
+// Servir archivos estáticos (si tienes un directorio 'public' con tu HTML)
+app.use(express.static('public'));
 
-app.get("/", (req, res) => {
-    res.send("Servidor funcionando...");
-});
+io.on('connection', (socket) => {
+    console.log('Nuevo cliente conectado');
 
-io.on("connection", (socket) => {
-    console.log("Un usuario se ha conectado");
-
-    socket.on("mensaje", (msg) => {
-        console.log("Mensaje recibido: ", msg);
-        io.emit("mensaje", msg); // Reenvía el mensaje a todos
+    // Cuando el cliente envía un mensaje, retransmitirlo a todos los demás clientes
+    socket.on('mensaje', (msg) => {
+        console.log('Mensaje recibido:', msg);
+        io.emit('mensaje', msg); // Emitir a todos los clientes
     });
 
-    socket.on("disconnect", () => {
-        console.log("Un usuario se ha desconectado");
+    socket.on('disconnect', () => {
+        console.log('Cliente desconectado');
     });
 });
 
+// Definir el puerto y arrancar el servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`Servidor funcionando en el puerto ${PORT}`);
 });
