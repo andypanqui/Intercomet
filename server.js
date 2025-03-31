@@ -10,6 +10,8 @@ const io = new Server(server, {
     }
 });
 
+app.use(express.static('public'))
+
 app.get("/", (req, res) => {
     res.send("Servidor funcionando...");
 });
@@ -28,6 +30,6 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
